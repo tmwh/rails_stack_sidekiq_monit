@@ -1,0 +1,11 @@
+<%
+  setup_env = "RAILS_ENV=#{@rails_env} /data/bin/rbenv-exec bundle exec"
+%>
+
+check process <%= @sidekiq_name %>
+  with pidfile "<%= @pid_path %>"
+  group sidekiq_<%= @app_name %>
+  group <%= @app_name %>
+  group sidekiq
+  start program = "/bin/su - <%= @user %> -c 'cd <%= @app_path %> && <%= setup_env %> sidekiq  <%= @sidekiq_config %> --index <%= @index %> --pidfile <%= @pid_path %> --environment <%= @sidekiq_env %> <%= @sidekiq_concurrency %> <%= @sidekiq_logfile %> <%= @sidekiq_queues %> -d'" with timeout 30 seconds
+  stop program = "/bin/su - <%= @user %> -c 'cd <%= @app_path %> && <%= setup_env %> sidekiqctl stop <%= @pid_path %>'" with timeout 30 seconds
